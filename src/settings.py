@@ -123,7 +123,7 @@ ENABLE_ALERTS = True
 #          ("metric3", "hipchat", EXPIRATION_TIME),
 #         )
 ALERTS = (
-    ("skyline", "smtp", 1800),
+    ("stats", "webhook", 600),  # 10 minute expiration time
 )
 
 # Each alert module requires additional information.
@@ -137,26 +137,8 @@ SMTP_OPTS = {
     },
 }
 
-# HipChat alerts require python-simple-hipchat
-HIPCHAT_OPTS = {
-    "auth_token": "pagerduty_auth_token",
-    # list of hipchat room_ids to notify about each anomaly
-    # (similar to SMTP_OPTS['recipients'])
-    "rooms": {
-        "skyline": (12345,),
-    },
-    # Background color of hipchat messages
-    # (One of "yellow", "red", "green", "purple", "gray", or "random".)
-    "color": "purple",
-}
-
-# PagerDuty alerts require pygerduty
-PAGERDUTY_OPTS = {
-    # Your pagerduty subdomain and auth token
-    "subdomain": "example",
-    "auth_token": "your_pagerduty_auth_token",
-    # Service API key (shown on the detail page of a "Generic API" service)
-    "key": "your_pagerduty_service_api_key",
+WEBHOOK_OPTS = {
+    'url': os.environ.get('WEBHOOK_ALERT_URL'),
 }
 
 

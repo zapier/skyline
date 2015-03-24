@@ -1,7 +1,9 @@
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
 from email.MIMEImage import MIMEImage
+import requests
 from smtplib import SMTP
+
 import alerters
 import settings
 
@@ -46,21 +48,18 @@ def alert_smtp(alert, metric):
         s.sendmail(sender, recipient, msg.as_string())
         s.quit()
 
-
-def alert_pagerduty(alert, metric):
-    import pygerduty
-    pager = pygerduty.PagerDuty(settings.PAGERDUTY_OPTS['subdomain'], settings.PAGERDUTY_OPTS['auth_token'])
-    pager.trigger_incident(settings.PAGERDUTY_OPTS['key'], "Anomalous metric: %s (value: %s)" % (metric[1], metric[0]))
-
-
-def alert_hipchat(alert, metric):
-    import hipchat
-    hipster = hipchat.HipChat(token=settings.HIPCHAT_OPTS['auth_token'])
-    rooms = settings.HIPCHAT_OPTS['rooms'][alert[0]]
-    link = settings.GRAPH_URL % (metric[1])
-
-    for room in rooms:
-        hipster.method('rooms/message', method='POST', parameters={'room_id': room, 'from': 'Skyline', 'color': settings.HIPCHAT_OPTS['color'], 'message': 'Anomaly: <a href="%s">%s</a> : %s' % (link, metric[1], metric[0])})
+def alert_webhook(alert, metric):
+    url = settings.get('WEBHOOK_OPTS', {}).get('url', None)
+    if not url:
+        return
+    request.post(
+        url,
+        data={
+            'metric': metric[1],
+            'value': metric[0],
+            'graph': settings.GRAPH_URL.format(metric[1])
+        },
+    )
 
 
 def trigger_alert(alert, metric):
