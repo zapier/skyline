@@ -1,6 +1,7 @@
 """
 Shared settings
 """
+import os
 
 # The path for the Redis unix socket
 REDIS_SOCKET_PATH = '/tmp/redis.sock'
@@ -32,11 +33,11 @@ MINI_DURATION = 3600
 
 # If you have a Graphite host set up, set this metric to get graphs on
 # Skyline and Horizon. Don't include http:// since this is used for carbon host as well.
-GRAPHITE_HOST = 'your_graphite_host.com'
+GRAPHITE_HOST = os.environ.get('GRAPHITE_HOST', '127.0.0.1')
 
 # The Graph url used to link to Graphite (Or another graphite dashboard)
 # %s will be replaced by the metric name
-GRAPH_URL = 'http://' + GRAPHITE_HOST + '/render/?width=1400&from=-1hour&target=%s'
+GRAPH_URL = 'https://' + GRAPHITE_HOST + '/render/?width=1400&from=-1hour&target=%s'
 
 # If you have a Graphite host set up, set its Carbon port.
 CARBON_PORT = 2003
@@ -45,7 +46,7 @@ CARBON_PORT = 2003
 # webapp. Include http://. If you don't want to use Oculus, set this to an
 # empty string. If you comment this out, Skyline won't work! Speed improvements
 # will occur when Oculus support is disabled.
-OCULUS_HOST = 'http://your_oculus_host.com'
+OCULUS_HOST = os.environ.get('OCULUS_HOST', '')
 
 """
 Analyzer settings
@@ -60,7 +61,7 @@ ANOMALY_DUMP = 'webapp/static/dump/anomalies.json'
 # if you set ANALYZER_PROCESSES to several less than the total number of
 # CPUs on your box. Be sure to leave some CPU room for the Horizon workers,
 # and for Redis.
-ANALYZER_PROCESSES = 5
+ANALYZER_PROCESSES = 1
 
 # This is the duration, in seconds, for a metric to become 'stale' and for
 # the analyzer to ignore it until new datapoints are added. 'Staleness' means
@@ -128,11 +129,11 @@ ALERTS = (
 # Each alert module requires additional information.
 SMTP_OPTS = {
     # This specifies the sender of email alerts.
-    "sender": "skyline-alerts@etsy.com",
+    "sender": "skyline@zapier.com",
     # recipients is a dictionary mapping metric names
     # (exactly matching those listed in ALERTS) to an array of e-mail addresses
     "recipients": {
-        "skyline": ["abe@etsy.com", "you@yourcompany.com"],
+        "skyline": [],
     },
 }
 
@@ -164,7 +165,7 @@ Horizon settings
 """
 # This is the number of worker processes that will consume from the Horizon
 # queue.
-WORKER_PROCESSES = 2
+WORKER_PROCESSES = 1
 
 # The IP address for Horizon to listen on.  Defaults to gethostname()
 # HORIZON_IP = '0.0.0.0'
@@ -211,16 +212,18 @@ MAX_RESOLUTION = 1000
 # namespaces by adding a '.' at the end of the skipped item - otherwise
 # you might skip things you don't intend to.
 SKIP_LIST = [
-    'example.statsd.metric',
-    'another.example.metric',
     # if you use statsd, these can result in many near-equal series
-    #'_90',
-    #'.lower',
-    #'.upper',
-    #'.median',
-    #'.count_ps',
-    #'.sum',
+    '_90',
+    '.lower',
+    '.upper',
+    '.median',
+    '.count_ps',
+    '.sum',
+    '.std',
 ]
+
+# allows you to do SKIP_STATS='prefix_1.,prefix_2.,.suffix_1'
+SKIP_LIST += filter(lambda x:x, os.environ.get('SKIP_STATS', '').split(','))
 
 
 """
