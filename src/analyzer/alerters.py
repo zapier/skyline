@@ -49,17 +49,16 @@ def alert_smtp(alert, metric):
         s.quit()
 
 def alert_webhook(alert, metric):
-    url = getattr(settings, 'WEBHOOK_OPTS', {}).get('url', None)
-    if not url:
-        return
-    request.post(
-        url,
-        data={
-            'metric': metric[1],
-            'value': metric[0],
-            'graph': settings.GRAPH_URL.format(metric[1])
-        },
-    )
+    url = settings.WEBHOOK_OPTS.get('url')
+    if url:
+        requests.post(
+            url,
+            data={
+                'metric': metric[1],
+                'value': metric[0],
+                'graph': settings.GRAPH_URL.format(metric[1]),
+            },
+        )
 
 
 def trigger_alert(alert, metric):
