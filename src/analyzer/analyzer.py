@@ -229,11 +229,9 @@ class Analyzer(Thread):
                 unpacker.feed(raw_series)
                 timeseries = list(unpacker)
                 time_human = (timeseries[-1][0] - timeseries[0][0]) / 3600
-                projected = 24 * (time() - now) / time_human
 
                 logger.info('canary duration   :: %.2f' % time_human)
                 self.send_graphite_metric('skyline.analyzer.duration', '%.2f' % time_human)
-                self.send_graphite_metric('skyline.analyzer.projected', '%.2f' % projected)
 
             # Reset counters
             self.anomalous_metrics[:] = []
