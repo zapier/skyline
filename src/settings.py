@@ -122,9 +122,16 @@ ENABLE_ALERTS = True
 #          ("metric2", "pagerduty", EXPIRATION_TIME),
 #          ("metric3", "hipchat", EXPIRATION_TIME),
 #         )
-ALERTS = (
-    ("stats", "webhook", 600),  # 10 minute expiration time
-)
+
+ALERTS = [
+    #("stats", "webhook", 300),  # 10 minute expiration time
+]
+
+
+# set ALERTS dynamically through the ALERT_PREFIXES env variable
+ALERT_PREFIXES = filter(lambda x:x, os.environ.get('ALERT_PREFIXES', '').split(','))
+
+ALERTS += [(prefix, 'webhook', 300) for prefix in ALERT_PREFIXES]
 
 # Each alert module requires additional information.
 SMTP_OPTS = {
